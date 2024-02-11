@@ -1,6 +1,11 @@
 #include <iostream>
+#include "File Generation/FileGenerator.h"
+#include "Misc/alphabet.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    FileGenerator *gen = new FileGenerator("test1.txt", 10000);
+    gen->Generate(alphabet);
+    delete gen;
+
     return 0;
 }
