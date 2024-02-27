@@ -41,3 +41,35 @@ std::vector<wchar_t> FanoCoding::AlphabetSortedByProbabilities() {
     });
     return sorted_alphabet;
 }
+
+void FanoCoding::MakeFanoCodes(int start, int end) {
+    if (start >= end) return;
+
+    double sum = 0;
+    std::vector<wchar_t> sorted_alpha(AlphabetSortedByProbabilities());
+    for(int i = start; i <= end; i++) {
+        sum += probabilities[sorted_alpha[i]];
+    }
+
+    double tmp_sum = 0;
+    int sep = start;
+    for(int i = start; i <= end; i++) {
+        if(tmp_sum + probabilities[sorted_alpha[i]] < sum / 2) {
+            tmp_sum += probabilities[sorted_alpha[i]];
+            fano_codes[sorted_alpha[i]] += L"0";
+        } else {
+            fano_codes[sorted_alpha[i]] += L"1";
+            if(sep == start) sep = i;
+        }
+    }
+
+    MakeFanoCodes(start, sep);
+    MakeFanoCodes(sep + 1, end);
+}
+
+void FanoCoding::get_fano_codes() {
+    for (auto &elem: fano_codes) {
+        std::wcout << elem.first << L':' << elem.second;
+        std::wcout << L'\n';
+    }
+}
