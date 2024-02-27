@@ -30,3 +30,14 @@ void FanoCoding::get_probabilities() {
         std::wcout << L'\n';
     }
 }
+
+std::vector<wchar_t> FanoCoding::AlphabetSortedByProbabilities() {
+    std::vector<wchar_t> sorted_alphabet;
+    for (auto &c: probabilities)
+        sorted_alphabet.push_back(c.first);
+    std::sort(sorted_alphabet.begin(), sorted_alphabet.end(),
+              [this](wchar_t &a, wchar_t &b)->bool{
+        return probabilities[a] > probabilities[b];
+    });
+    return sorted_alphabet;
+}
