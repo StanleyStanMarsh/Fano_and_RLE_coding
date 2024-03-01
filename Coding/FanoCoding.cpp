@@ -11,7 +11,7 @@ void FanoCoding::FindProbabilities(const std::string& file_name) {
     in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
 
     wchar_t sym;
-    float file_len = 0;
+    double file_len = 0;
     while(in >> sym) {
         probabilities[sym] += 1;
         file_len += 1;
@@ -45,22 +45,14 @@ std::vector<wchar_t> FanoCoding::AlphabetSortedByProbabilities() {
 void FanoCoding::MakeFanoCodes(int start, int end) {
     if (start >= end) return;
 
-    double sum = 0;
     std::vector<wchar_t> sorted_alpha(AlphabetSortedByProbabilities());
-    for(int i = start; i <= end; i++) {
-        sum += probabilities[sorted_alpha[i]];
-    }
+    int sep = FindAlmostEqualSubvectors(start, end);
 
-    double tmp_sum = 0;
-    int sep = start;
-    for(int i = start; i <= end; i++) {
-        if(tmp_sum + probabilities[sorted_alpha[i]] < sum / 2) {
-            tmp_sum += probabilities[sorted_alpha[i]];
-            fano_codes[sorted_alpha[i]] += L"0";
-        } else {
-            fano_codes[sorted_alpha[i]] += L"1";
-            if(sep == start) sep = i;
-        }
+    for(int i = start; i < sep+1; i++) {
+        fano_codes[sorted_alpha[i]] += L"1";
+    }
+    for(int i = sep+1; i < end+1; i++) {
+        fano_codes[sorted_alpha[i]] += L"0";
     }
 
     MakeFanoCodes(start, sep);
@@ -68,8 +60,36 @@ void FanoCoding::MakeFanoCodes(int start, int end) {
 }
 
 void FanoCoding::get_fano_codes() {
-    for (auto &elem: fano_codes) {
-        std::wcout << elem.first << L':' << elem.second;
-        std::wcout << L'\n';
+    std::vector<wchar_t> sorted_alpha(AlphabetSortedByProbabilities());
+    for (auto sym: sorted_alpha) {
+        std::wcout << sym << L": " << fano_codes[sym] << L' ' << probabilities[sym] * 10000 << L'\n';
     }
+//    for (auto &elem: fano_codes) {
+//        std::wcout << elem.first << L':' << elem.second;
+//        std::wcout << L'\n';
+//    }
+}
+
+int FanoCoding::FindAlmostEqualSubvectors(int begin, int end) {
+    std::vector<wchar_t> sorted_alpha(AlphabetSortedByProbabilities());
+    int l = begin;
+    int r = end;
+    double left_sum = probabilities[sorted_alpha[l]];
+    double right_sum = probabilities[sorted_alpha[r]];
+    while(l < r) {
+        if (std::abs(left_sum - right_sum) == DBL_MIN)
+            return l;
+        else if (left_sum < right_sum)
+            left_sum += probabilities[sorted_alpha[++l]];
+        else
+            right_sum += probabilities[sorted_alpha[--r]];
+    }
+    if (l == r) right_sum -= probabilities[sorted_alpha[l]];
+    if (begin + 1 != end) {
+        double d1 = std::abs(left_sum - right_sum);
+        double d2 = std::abs(left_sum - probabilities[sorted_alpha[l]] - (right_sum + probabilities[sorted_alpha[l]]));
+        if (d2 < d1)
+            return l - 1;
+    }
+    return l;
 }
