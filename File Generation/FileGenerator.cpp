@@ -6,7 +6,7 @@ FileGenerator::FileGenerator(const std::string& file_name, int n) {
     this->num_of_symbols = n;
 }
 
-void FileGenerator::Generate(std::vector<wchar_t> alpha) {
+void FileGenerator::Generate(std::vector<wchar_t> &alpha) {
     std::default_random_engine generator(time(0));
     std::uniform_int_distribution<int> distribution(0,alpha.size());
     for (int i = 0; i < num_of_symbols; i++)
