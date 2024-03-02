@@ -5,19 +5,15 @@ FanoCoding::FanoCoding(std::vector<wchar_t> *alpha) {
     this->alphabet = alpha;
 }
 
-void FanoCoding::FindProbabilities(const std::string& file_name) {
-    std::wifstream in;
-    in.open(file_name);
-    in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+void FanoCoding::FindProbabilities(std::wifstream &in_stream) {
+    in_stream.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
 
     wchar_t sym;
     double file_len = 0;
-    while(in >> sym) {
+    while(in_stream >> sym) {
         probabilities[sym] += 1;
         file_len += 1;
     }
-
-    in.close();
 
     for (auto &elem: probabilities) {
         elem.second = elem.second / file_len;
@@ -64,10 +60,6 @@ void FanoCoding::get_fano_codes() {
     for (auto sym: sorted_alpha) {
         std::wcout << sym << L": " << fano_codes[sym] << L' ' << probabilities[sym] * 10000 << L'\n';
     }
-//    for (auto &elem: fano_codes) {
-//        std::wcout << elem.first << L':' << elem.second;
-//        std::wcout << L'\n';
-//    }
 }
 
 int FanoCoding::FindAlmostEqualSubvectors(int begin, int end) {
@@ -92,4 +84,56 @@ int FanoCoding::FindAlmostEqualSubvectors(int begin, int end) {
             return l - 1;
     }
     return l;
+}
+
+bool FanoCoding::Encode(const std::string &file_name) {
+    std::wifstream in;
+    in.open(file_name);
+
+    if (!in) {
+        in.close();
+        return false;
+    }
+
+    FindProbabilities(in);
+    MakeFanoCodes(0, alphabet->size()-1);
+    in.close();
+
+    std::ofstream out;
+    out.open(file_name + ".compressed");
+    in.open(file_name);
+
+    if (!out) {
+        out.close();
+        in.close();
+        return false;
+    }
+
+    wchar_t sym;
+    char buffer = 0;
+    int bit = 1;
+    while(in >> sym) {
+        for (wchar_t b : fano_codes[sym]) {
+            if (b == '1') buffer |= 0b00000001;
+            if (bit == CHAR_BIT) {
+                out << buffer;
+                buffer = 0;
+                bit = 1;
+            }
+            else {
+                buffer <<= 1;
+                bit++;
+            }
+        }
+    }
+    if (bit != 0) {
+        for (; bit <= CHAR_BIT; bit++) {
+            buffer <<= 1;
+        }
+
+    }
+
+    out.close();
+    in.close();
+    return true;
 }

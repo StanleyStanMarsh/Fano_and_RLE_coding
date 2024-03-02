@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <float.h>
+#include <bitset>
 #include <fstream>
 
 class FanoCoding {
@@ -14,10 +15,11 @@ class FanoCoding {
 private:
     std::vector<wchar_t> AlphabetSortedByProbabilities();
     int FindAlmostEqualSubvectors(int begin, int end);
-public:
-    void FindProbabilities(const std::string& file_name);
-    FanoCoding(std::vector<wchar_t> *alpha);
+    void FindProbabilities(std::wifstream &in_stream);
     void MakeFanoCodes(int start, int end);
+public:
+    FanoCoding(std::vector<wchar_t> *alpha);
+    bool Encode(const std::string &file_name);
     void get_probabilities();
     void get_fano_codes();
 };
