@@ -19,11 +19,15 @@ private:
     void MakeFanoCodes(int start, int end);
 public:
     FanoCoding(std::vector<wchar_t> *alpha);
+
     bool Encode(const std::string &file_name);
     std::wstring EncodeToWstring(const std::string &file_name);
     bool Decode(const std::string &file_name);
     std::wstring DecodeFromWstring(std::wstring code_string);
     bool IsDecodeCorrect(const std::string &file_name);
+
+    double PriceOfEncoding();
+    double CompressionRatio(const std::string &file_name);
     void get_probabilities();
     void get_fano_codes();
 };

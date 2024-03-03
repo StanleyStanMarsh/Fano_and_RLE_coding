@@ -256,5 +256,20 @@ bool FanoCoding::IsDecodeCorrect(const std::string &file_name) {
     for (int i = 0; i < original.size(); i++) {
         if (original[i] != decoded[i]) return false;
     }
+    in.close();
     return true;
+}
+
+double FanoCoding::PriceOfEncoding() {
+    double price;
+    for (int i = 0; i < probabilities.size(); i++) {
+        price += probabilities[i] * fano_codes[probabilities[i]].size();
+    }
+    return price;
+}
+
+double FanoCoding::CompressionRatio(const std::string &file_name) {
+    std::ifstream in1(file_name, std::ifstream::ate | std::ifstream::binary);
+    std::ifstream in2(file_name + ".compressed", std::ifstream::ate | std::ifstream::binary);
+    return (double)(in1.tellg()) / (double)(in2.tellg());
 }
