@@ -196,3 +196,65 @@ bool FanoCoding::Decode(const std::string &file_name) {
     out.close();
     return true;
 }
+
+std::wstring FanoCoding::EncodeToWstring(const std::string &file_name) {
+    std::wifstream in;
+    in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    in >> std::noskipws;
+    in.open(file_name, std::ios::in | std::ios::binary);
+
+    if (!in) {
+        in.close();
+        return L"err";
+    }
+
+    FindProbabilities(in);
+    MakeFanoCodes(0, alphabet->size());
+    in.close();
+
+    in.open(file_name, std::ios::in | std::ios::binary);
+    in >> std::noskipws;
+
+    wchar_t sym;
+    std::wstring code;
+    while(in >> sym) {
+        code += fano_codes[sym];
+    }
+    in.close();
+    return code;
+}
+
+std::wstring FanoCoding::DecodeFromWstring(std::wstring code_string) {
+    std::wstring decoded_msg;
+    bool found = true;
+    while (found) {
+        for (auto code: fano_codes) {
+            found = false;
+            if (code_string.starts_with(code.second)) {
+                code_string = code_string.substr(code.second.size());
+                decoded_msg += code.first;
+                found = true;
+                break;
+            }
+        }
+    }
+    return decoded_msg;
+}
+
+bool FanoCoding::IsDecodeCorrect(const std::string &file_name) {
+    std::wifstream in;
+    in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    in >> std::noskipws;
+    in.open(file_name, std::ios::in | std::ios::binary);
+
+    std::wstring original;
+    wchar_t sym;
+    while (in >> sym) {
+        original += sym;
+    }
+    std::wstring decoded = DecodeFromWstring(EncodeToWstring(file_name));
+    for (int i = 0; i < original.size(); i++) {
+        if (original[i] != decoded[i]) return false;
+    }
+    return true;
+}
