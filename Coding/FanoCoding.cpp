@@ -1,4 +1,3 @@
-#include <codecvt>
 #include "FanoCoding.h"
 
 FanoCoding::FanoCoding(std::vector<wchar_t> *alpha) {
