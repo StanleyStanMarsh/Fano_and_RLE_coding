@@ -20,6 +20,7 @@ private:
 public:
     FanoCoding(std::vector<wchar_t> *alpha);
     bool Encode(const std::string &file_name);
+    bool Decode(const std::string &file_name);
     void get_probabilities();
     void get_fano_codes();
 };

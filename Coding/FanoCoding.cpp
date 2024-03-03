@@ -88,7 +88,9 @@ int FanoCoding::FindAlmostEqualSubvectors(int begin, int end) {
 
 bool FanoCoding::Encode(const std::string &file_name) {
     std::wifstream in;
-    in.open(file_name);
+    in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    in >> std::noskipws;
+    in.open(file_name, std::ios::in | std::ios::binary);
 
     if (!in) {
         in.close();
@@ -96,12 +98,13 @@ bool FanoCoding::Encode(const std::string &file_name) {
     }
 
     FindProbabilities(in);
-    MakeFanoCodes(0, alphabet->size()-1);
+    MakeFanoCodes(0, alphabet->size());
     in.close();
 
     std::ofstream out;
-    out.open(file_name + ".compressed");
-    in.open(file_name);
+    out.open(file_name + ".compressed", std::ios::in | std::ios::binary);
+    in.open(file_name, std::ios::in | std::ios::binary);
+    in >> std::noskipws;
 
     if (!out) {
         out.close();
@@ -130,10 +133,66 @@ bool FanoCoding::Encode(const std::string &file_name) {
         for (; bit <= CHAR_BIT; bit++) {
             buffer <<= 1;
         }
-
+        out << buffer;
     }
 
     out.close();
     in.close();
+    return true;
+}
+
+bool FanoCoding::Decode(const std::string &file_name) {
+    if (!file_name.ends_with(".compressed")) return false;
+
+    std::ifstream in;
+    in.open(file_name, std::ios::in | std::ios::binary);
+
+    in.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+
+    if (!in) {
+        in.close();
+        return false;
+    }
+
+    char sym;
+    std::wstring file_code;
+    in >> std::noskipws;
+    while(in >> sym) {
+        std::bitset<8> bits(sym);
+        std::string sym_code = bits.to_string();
+        for (auto c: sym_code) {
+            if (c == '1') file_code += L"1";
+            else file_code += L"0";
+        }
+    }
+    in.close();
+
+    std::wstring decoded_msg;
+    bool found = true;
+    while (found) {
+        for (auto code: fano_codes) {
+            found = false;
+            if (file_code.starts_with(code.second)) {
+                file_code = file_code.substr(code.second.size());
+                decoded_msg += code.first;
+                found = true;
+                break;
+            }
+        }
+    }
+
+    std::wofstream out;
+    std::string new_file_name = file_name;
+    new_file_name.erase(file_name.rfind(".compressed"), 11);
+    out.open("decompressed_" + new_file_name, std::ios::in | std::ios::binary);
+    out.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+
+    if (!out) {
+        out.close();
+        return false;
+    }
+    out << decoded_msg;
+
+    out.close();
     return true;
 }
