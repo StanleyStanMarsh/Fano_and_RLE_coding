@@ -12,5 +12,8 @@ class RLECoding {
 public:
     RLECoding() { code = L""; }
     bool Encode(const std::string &file_name);
+    bool Encode(std::wstring file_code);
+
+    double CompressionRatio(const std::string &file_name);
     std::wstring get_code();
 };
