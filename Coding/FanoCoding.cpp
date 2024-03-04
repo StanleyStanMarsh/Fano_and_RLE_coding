@@ -101,7 +101,7 @@ bool FanoCoding::Encode(const std::string &file_name) {
     in.close();
 
     std::ofstream out;
-    out.open(file_name + ".compressed", std::ios::in | std::ios::binary);
+    out.open(file_name + ".compressed", std::ios::out | std::ios::binary);
     in.open(file_name, std::ios::in | std::ios::binary);
     in >> std::noskipws;
 
@@ -183,7 +183,7 @@ bool FanoCoding::Decode(const std::string &file_name) {
     std::wofstream out;
     std::string new_file_name = file_name;
     new_file_name.erase(file_name.rfind(".compressed"), 11);
-    out.open("decompressed_" + new_file_name, std::ios::in | std::ios::binary);
+    out.open("decompressed_" + new_file_name, std::ios::out | std::ios::binary);
     out.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
 
     if (!out) {
