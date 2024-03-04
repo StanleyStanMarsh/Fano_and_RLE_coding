@@ -75,4 +75,13 @@ double RLECoding::CompressionRatio(const std::string &file_name) {
     return (double)(file_code.size()) / (double)(code.size());
 }
 
+void RLECoding::WriteToFile(const std::string &file_name) {
+    std::wofstream out;
+    out.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    out.open(file_name, std::ios::out | std::ios::binary);
+
+    out << code;
+    out.close();
+}
+
 
