@@ -84,4 +84,42 @@ void RLECoding::WriteToFile(const std::string &file_name) {
     out.close();
 }
 
+std::wstring RLECoding::Decode(const std::string &file_name) {
+    std::wofstream out;
+    out.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    out.open("decoded_with_RLE_" + file_name, std::ios::out | std::ios::binary);
+    std::wstring decoded;
+    for (auto c: code_vector) {
+        decoded += std::wstring(c.first, c.second);
+    }
+    out << decoded;
+    out.close();
+    return decoded;
+}
+
+bool RLECoding::CompareFiles(const std::string &file_name1, const std::string &file_name2) {
+    std::wifstream in1;
+    in1.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    in1 >> std::noskipws;
+    in1.open(file_name1, std::ios::in | std::ios::binary);
+
+    std::wifstream in2;
+    in2.imbue( std::locale(std::locale(), new std::codecvt_utf8<wchar_t>) );
+    in2 >> std::noskipws;
+    in2.open(file_name2, std::ios::in | std::ios::binary);
+
+    wchar_t sym;
+    std::wstring file_code1;
+    while (in1 >> sym) {
+        file_code1 += sym;
+    }
+
+    std::wstring file_code2;
+    while (in2 >> sym) {
+        file_code2 += sym;
+    }
+
+    return file_code1 == file_code2;
+}
+
 
