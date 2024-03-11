@@ -72,7 +72,7 @@ double RLECoding::CompressionRatio(const std::string &file_name) {
         file_code += sym;
     }
     in.close();
-    return (double)(file_code.size()) / (double)(code.size());
+    return (double)(file_code.size() * CHAR_BIT) / (double)(code.size());
 }
 
 void RLECoding::WriteToFile(const std::string &file_name) {
